@@ -11,9 +11,10 @@ def run_search_terms():
 
 def run_reddit():
     BOARDS = [
-        "securityCTF",
-        "MachineLearning",
-        "learnmachinelearning"
+        "securityCTF"
+        , "Python"
+        , "MachineLearning"
+        ,"learnmachinelearning"
     ]
     v_reddit = reddit.Reddit()
     for board in BOARDS:
@@ -21,8 +22,9 @@ def run_reddit():
 
 
 if __name__ == '__main__':
-    schedule.every(1).hour.do(run_search_terms)
-    schedule.every(1).hour.do(run_reddit)
+    schedule.every().day.at("08:00").do(run_search_terms)
+    schedule.every().day.at("18:00").do(run_search_terms)
+    schedule.every().day.at("08:00").do(run_reddit)
 
     while True:
         schedule.run_pending()
