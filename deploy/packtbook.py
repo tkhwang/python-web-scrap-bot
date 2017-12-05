@@ -33,8 +33,8 @@ class Packtbook:
         options.add_argument('window-size=1920x1080')
         options.add_argument("disable-gpu")
 
-        driver = webdriver.Chrome('./../run/mac/chromedriver', chrome_options=options)
-        #driver = webdriver.Chrome('./../run/mac/chromedriver')
+        driver = webdriver.Chrome('./../run/chromedriver', chrome_options=options)
+        #driver = webdriver.Chrome('./../run/chromedriver')
 
         driver.get('https://www.packtpub.com/packt/offers/free-learning')
         driver.implicitly_wait(10)
