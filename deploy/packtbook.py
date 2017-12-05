@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import slackbot
 import datetime
 import requests
@@ -28,6 +29,7 @@ class Packtbook:
         return str
 
     def get_update(self):
+        """
         options = webdriver.ChromeOptions()
         options.add_argument('headless')
         options.add_argument('window-size=1920x1080')
@@ -35,9 +37,15 @@ class Packtbook:
 
         driver = webdriver.Chrome('./../run/chromedriver', chrome_options=options)
         #driver = webdriver.Chrome('./../run/chromedriver')
+        """
+
+        options = DesiredCapabilities.PHANTOMJS
+        options[
+            "phantomjs.page.settings.userAgent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
+        driver = webdriver.PhantomJS('../run/phantomjs', desired_capabilities=options)
 
         driver.get('https://www.packtpub.com/packt/offers/free-learning')
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(3)
 
         self.scraps['head'] = "\n\n[*] Packtbook : {}\n{}".format(datetime.datetime.now(), URL_PACKET)
 
@@ -62,8 +70,11 @@ class Packtbook:
         return self.beautify_msg(self.scraps)
 
     def report_to_slack(self):
-        msg = self.get_update()
-        self.slack.send_message(msg)
+        try:
+            msg = self.get_update()
+            self.slack.send_message(msg)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == '__main__':

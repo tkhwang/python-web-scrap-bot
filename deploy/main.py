@@ -27,9 +27,10 @@ def run_reddit():
 
 if __name__ == '__main__':
     schedule.every().day.at("08:00").do(run_packtbook)
-    schedule.every().day.at("08:00").do(run_search_terms)
-    schedule.every().day.at("18:00").do(run_search_terms)
     schedule.every().day.at("08:00").do(run_reddit)
+    schedule.every().day.at("08:00").do(run_search_terms)
+    schedule.every().day.at("13:00").do(run_search_terms)
+    schedule.every().day.at("18:00").do(run_search_terms)
 
     while True:
         schedule.run_pending()
