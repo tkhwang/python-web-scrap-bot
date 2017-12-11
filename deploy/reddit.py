@@ -1,7 +1,22 @@
+from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 import requests
 from bs4 import BeautifulSoup as bs
 import slackbot
 import datetime
+
+
+Local = True
+if Local:
+    # Local
+    SCREENSHOT_PREFIX = './'
+    PHANTOMJS = '../run/phantomjs'
+else:
+    # Server
+    SCREENSHOT_PREFIX = '/root/deploy/'
+    PHANTOMJS= '/root/run/phantomjs'
+
 
 class Reddit():
     def __init__(self):
@@ -28,11 +43,20 @@ class Reddit():
         return str
 
     def get_update(self, board):
+
+        options = DesiredCapabilities.PHANTOMJS
+        options["phantomjs.page.settings.userAgent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
+        driver = webdriver.PhantomJS('phantomjs', desired_capabilities=options)
+
+        driver.get("https://www.reddit.com/r/" + board)
+        driver.implicitly_wait(3)
+        driver.save_screenshot(SCREENSHOT_PREFIX + board + '.png')
+
         scraps = {}
 
         with requests.Session() as s:
             s.headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
-            first_page = s.get("https://www.reddit.com/r/" + board)
+            first_page = s.get('https://www.reddit.com/r/' + board)
     
             html = first_page.text
             soup = bs(html, 'lxml')
@@ -49,19 +73,27 @@ class Reddit():
                 })
         return self.beautify_msg(board, scraps)
 
-    def report_to_slack(self, board):
-        msg = self.get_update(board)
-        #print(msg)
+
+    def report_to_slack(self, msg):
         self.slack.send_message(msg)
+
+
+    def post_image_to_slack(self, img):
+        self.slack.post_image(img)
+
+
+    def publish(self, board):
+        m = self.get_update(board)                
+        self.post_image_to_slack(SCREENSHOT_PREFIX + board + '.png')
+        self.report_to_slack(m)
 
 
 if __name__ == '__main__':
     BOARDS = [
-        "securityCTF",
-        "MachineLearning",
-        "learnmachinelearning"
+        "Python"
     ]
 
     reddit = Reddit()
     for board in BOARDS:
-        print(reddit.report_to_slack(board))
+        reddit.publish(board)
+

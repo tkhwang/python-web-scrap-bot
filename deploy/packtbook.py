@@ -8,7 +8,17 @@ import time
 
 
 URL_PACKET = "https://www.packtpub.com/packt/offers/free-learning"
-IMG_PACKET = "./../img/packet.png"
+
+Local = False
+if Local:
+    # Local
+    PHANTOMJS = '../run/phantomjs'
+    IMG_PACKET = "./packet.png"
+else:
+    # Server
+    PHANTOMJS= '/root/run/phantomjs'
+    IMG_PACKET = '/root/deploy/packet.png'
+
 
 class Packtbook:
     def __init__(self):
@@ -42,7 +52,7 @@ class Packtbook:
         options = DesiredCapabilities.PHANTOMJS
         options[
             "phantomjs.page.settings.userAgent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
-        driver = webdriver.PhantomJS('../run/phantomjs', desired_capabilities=options)
+        driver = webdriver.PhantomJS(PHANTOMJS, desired_capabilities=options)
 
         driver.get('https://www.packtpub.com/packt/offers/free-learning')
         driver.implicitly_wait(3)
