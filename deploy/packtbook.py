@@ -1,10 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-import slackbot
 import datetime
 import requests
 import os
 import time
+
+import slackbot
+import slackbot_samsung
 
 
 URL_PACKET = "https://www.packtpub.com/packt/offers/free-learning"
@@ -23,6 +25,7 @@ else:
 class Packtbook:
     def __init__(self):
         self.slack = slackbot.SlackBot()
+        self.slack_samsung = slackbot_samsung.SlackBotSamsung()
         self.scraps = { 'result' : [] }
         os.system("rm -rf " + IMG_PACKET)
 
@@ -79,14 +82,21 @@ class Packtbook:
         driver.quit()
         return self.beautify_msg(self.scraps)
 
+
     def report_to_slack(self):
+        msg = ''
         try:
             msg = self.get_update()
             self.slack.send_message(msg)
+            self.slack_samsung.send_message(msg)
         except Exception as e:
             print(e)
 
 
+    def publish(self):
+        self.report_to_slack()
+
+
 if __name__ == '__main__':
     packtbook = Packtbook()
-    packtbook.report_to_slack()
+    packtbook.publish()

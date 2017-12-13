@@ -3,7 +3,7 @@ from slacker import Slacker
 SLACK_TOKEN = ''
 SLACK_BOARD = ''
 
-class SlackBot:
+class SlackBotSamsung:
     def __init__(self):
         self.token = SLACK_TOKEN
         self.slack = Slacker(self.token)

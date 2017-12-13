@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 import json
 import operator
+from urllib import parse
+from pyshorteners import Shortener
 
 import slackbot
 
@@ -12,6 +14,8 @@ import slackbot
 POINT = 21
 NUMBER_RECENT = 20
 NUMBER_OF_HOW_MANY = 30
+GOOGLE_API_KEY = ''
+
 
 Local = True
 if Local:
@@ -31,11 +35,16 @@ class SearchNaver():
                 self.l_naver = json.load(f)
         except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
             self.l_naver = {
-                'title': 'NAVER famous search terms',
+                'title': 'NAVER search during recent several hours',
                 'url': 'http://naver.com',
                 'update': []
             }
             json.dump(self.l_naver, open(JSON_FILE_NAVER, "w+"))
+
+
+    def short_link(self, url):
+        shortener = Shortener('Google', api_key=GOOGLE_API_KEY)
+        return '{}'.format(shortener.short(url))
 
 
     def serialize_msg(self):
@@ -44,7 +53,11 @@ class SearchNaver():
         str += self.l_naver['url'] + '\n'
         str += self.l_naver['update'][-1]['date'] + '\n'
         for key, value in self.l_naver['update'][-1]['terms'].items():
-            str += value + " : " + key + "\n"
+            str += '\n' + value + " : " + key + "\n"
+            key_encoded = parse.quote(key)
+            url = 'https://search.naver.com/search.naver?where=nexearch&query={}&ie=utf8&sm=tab_lve'.format(key_encoded)
+            #link = self.short_link(url)
+            str += url + '\n'
         return str
 
 
@@ -54,7 +67,11 @@ class SearchNaver():
         s += '*[*] ' + self.l_naver['title'] + '*' + '\n'
         for n, i in enumerate(sorted_summary):
             (word, point) = i
-            s += str(point) + " : " + word + '\n'
+            s += '\n' + str(point) + " : " + word + '\n'
+            word_encoded = parse.quote(word)
+            url = 'https://search.naver.com/search.naver?where=nexearch&query={}&ie=utf8&sm=tab_lve'.format(word_encoded) 
+            #link = self.short_link(url)
+            s += url + '\n'
         return s
 
 
@@ -100,10 +117,13 @@ class SearchNaver():
     def report_to_slack(self, msg):
         self.slack.send_message(msg)
 
+    
+    def publish(self):
+        m = self.get_update()
+        self.report_to_slack(m)
+
 
 if __name__ == '__main__':
     search_naver = SearchNaver()
-    print(search_naver.get_update())
-    #print(search_naver.serialize_summary(search_naver.summary_recent(NUMBER_RECENT)))
-
+    search_naver.publish()
 
